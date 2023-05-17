@@ -9,8 +9,9 @@ def _is_protocol(type_: type, /) -> bool:
 def _is_runtime_protocol(type_: type, /) -> bool:
     return _is_protocol(type_) and getattr(type_, "_is_runtime_protocol", False) is True
 
+
 def _is_generic_alias(obj: Any, /) -> bool:
-    return isinstance(obj, typing._GenericAlias)
+    return isinstance(obj, typing._GenericAlias)  # type: ignore
 
 
 def is_subtype(lhs: Any, rhs: Any, /) -> bool:
@@ -43,10 +44,10 @@ def is_subtype(lhs: Any, rhs: Any, /) -> bool:
         and isinstance(lhs, rhs)
     ):
         return True
-    
-    # 
+
+    #
     # Generic alias check
-    # 
+    #
     # TODO
 
     return False
