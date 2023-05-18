@@ -1,4 +1,4 @@
-from typing import Any, List, Mapping, Protocol, runtime_checkable
+from typing import Any, List, Mapping, Protocol, Tuple, runtime_checkable
 
 import pytest
 
@@ -93,3 +93,12 @@ def test_any(typ: Any) -> None:
     """
 
     assert is_subtype(typ, Any)
+
+
+@pytest.mark.skip(reason="Functionality not yet implemented")
+@pytest.mark.parametrize(
+    "lhs,rhs,expected",
+    ((Tuple[int, int], Tuple[int, ...], True),),
+)
+def test_other(lhs: Any, rhs: Any, expected: bool) -> None:
+    assert is_subtype(lhs, rhs) is expected

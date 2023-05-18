@@ -1,5 +1,31 @@
+import typing
+from typing import Dict, Literal, Optional, Sequence, TypeVar, Union
+
 from subtype import normalise
-from typing import Dict, Sequence
+from subtype.normalisation import _type_var_to_type
 
 # d = normalise(Sequence[int])
-d = normalise(Dict[str, int])
+# d = normalise(Dict[str, int])
+
+# T = TypeVar("T")
+StrOrBytes = TypeVar("StrOrBytes", str, bytes)
+
+# d = normalise(T)
+
+# d = {
+#     v.__origin__: v
+#     for k, v in typing.__dict__.items()
+#     if k in typing.__all__ and isinstance(v, typing._GenericAlias)
+# }
+
+# d = normalise(StrOrBytes)
+
+# d1 = normalise(_type_var_to_type(TypeVar("T", str, bytes)))
+# d2 = normalise(TypeVar("T", str, bytes))
+# d3 = normalise(Union[str, bytes])
+
+# assert normalise(StrOrBytes) == normalise(Union[str, bytes])
+
+# x: Literal["foo", "bar"] = 1
+# y: Optional = 1
+# z: Union = 1
