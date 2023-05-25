@@ -1,7 +1,16 @@
 import collections.abc
 import typing
-from typing import (Any, ClassVar, Final, Literal, Mapping, Optional, Tuple,
-                    TypeVar, Union)
+from typing import (
+    Any,
+    ClassVar,
+    Final,
+    Literal,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from .models import NormalisedType
 from .types import GenericAlias
@@ -38,7 +47,7 @@ def normalise(type_: Any, /) -> NormalisedType:
 
     if type_ in (None, Ellipsis) or isinstance(type_, type):
         return NormalisedType(type_)
-    
+
     # Temporarily assume that if it's a primitive, then in it's an arg of Literal[...]
     if isinstance(type_, (str, int)):
         return NormalisedType(type_)

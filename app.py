@@ -1,8 +1,8 @@
 import typing
-from typing import Dict, Literal, Optional, Sequence, TypeVar, Union
+from typing import Dict, Literal, Optional, Sequence, Type, TypeVar, Union, NamedTuple
 
-from subtype import normalise
-from subtype.normalisation import _type_var_to_type
+# from subtype import normalise
+# from subtype.normalisation import _type_var_to_type
 
 # d = normalise(Sequence[int])
 # d = normalise(Dict[str, int])
@@ -29,3 +29,10 @@ StrOrBytes = TypeVar("StrOrBytes", str, bytes)
 # x: Literal["foo", "bar"] = 1
 # y: Optional = 1
 # z: Union = 1
+
+
+class Foo(NamedTuple):
+    x: int
+
+
+x: Type[NamedTuple] = Foo
