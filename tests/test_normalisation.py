@@ -1,9 +1,12 @@
 import collections.abc
 import contextlib
 import decimal
+import typing as t
+import typing_extensions as te
 from typing import (
     AbstractSet,
     Any,
+    AnyStr,
     AsyncContextManager,
     AsyncGenerator,
     AsyncIterable,
@@ -24,6 +27,7 @@ from typing import (
     Final,
     FrozenSet,
     Generator,
+    Generic,
     Hashable,
     ItemsView,
     Iterable,
@@ -37,12 +41,22 @@ from typing import (
     MutableSequence,
     MutableSet,
     NamedTuple,
+    NoReturn,
     Optional,
     OrderedDict,
+    Protocol,
     Reversible,
     Sequence,
     Set,
     Sized,
+    SupportsAbs,
+    SupportsBytes,
+    SupportsComplex,
+    SupportsFloat,
+    SupportsIndex,
+    SupportsInt,
+    SupportsRound,
+    Text,
     Tuple,
     Type,
     TypeVar,
@@ -55,6 +69,9 @@ import pytest
 from typing_extensions import ParamSpec
 
 from subtype import NormalisedType, normalise
+
+T = TypeVar("T")
+PS = ParamSpec("PS")
 
 
 def n(*args) -> NormalisedType:
@@ -105,12 +122,9 @@ def n(*args) -> NormalisedType:
         (Final, n(Final, (n(Any),))),
         (Final[int], n(Final, (n(int),))),
         # TODO: 'ForwardRef'
-        # TODO: 'Generic'
-        # TODO: 'Literal' with no args should throw exception
+        #   E.g. ForwardRef["int"] -> int
         (Literal["fish", 123], n(Literal, (n("fish"), n(123)))),
-        # TODO: 'Optional' with no args should throw exception
         (Optional[int], n(Union, (n(int), n(type(None))))),
-        # TODO: 'Protocol'
         (Tuple, n(tuple, (n(Any), n(...)))),
         (Tuple[int, ...], n(tuple, (n(int), n(...)))),
         (Tuple[int, str], n(tuple, (n(int), n(str)))),
@@ -119,7 +133,6 @@ def n(*args) -> NormalisedType:
         (TypeVar("T"), n(Any)),
         (TypeVar("T", bound=int), n(int)),
         (TypeVar("T", str, bytes), n(Union, (n(str), n(bytes)))),
-        # TODO: 'Union' with no args should throw exception
         (Union[int, str], n(Union, (n(int), n(str)))),
         # ABCs (from collections.abc).
         (AbstractSet, n(collections.abc.Set, (n(Any),))),
@@ -176,13 +189,16 @@ def n(*args) -> NormalisedType:
         # Structural checks, a.k.a. protocols.
         (Reversible, n(collections.abc.Reversible, (n(Any),))),
         (Reversible[str], n(collections.abc.Reversible, (n(str),))),
-        # 'SupportsAbs',
-        # 'SupportsBytes',
-        # 'SupportsComplex',
-        # 'SupportsFloat',
-        # 'SupportsIndex',
-        # 'SupportsInt',
-        # 'SupportsRound',
+
+        # WARN: Currently broken vvv
+        # (SupportsAbs, n(SupportsAbs, (n(Any),))),
+        (SupportsBytes, n(SupportsBytes)),
+        (SupportsComplex, n(SupportsComplex)),
+        (SupportsFloat, n(SupportsFloat)),
+        (SupportsIndex, n(SupportsIndex)),
+        (SupportsInt, n(SupportsInt)),
+        # WARN: Currently broken vvv
+        # (SupportsRound, n(SupportsRound, (n(Any),))),
         # Concrete collection types.
         (ChainMap, n(collections.ChainMap, (n(Any), n(Any)))),
         (ChainMap[str, int], n(collections.ChainMap, (n(str), n(int)))),
@@ -210,22 +226,32 @@ def n(*args) -> NormalisedType:
             n(collections.abc.Generator, (n(int), n(str), n(bool))),
         ),
         # One-off things.
-        # 'AnyStr',
-        # 'cast',
-        # 'final',
-        # 'get_args',
-        # 'get_origin',
-        # 'get_type_hints',
-        # 'NewType',
-        # 'no_type_check',
-        # 'no_type_check_decorator',
-        # 'NoReturn',
-        # 'overload',
-        # 'runtime_checkable',
-        # 'Text',
-        # 'TYPE_CHECKING',
+        (AnyStr, n(Union, (n(bytes), n(str)))),
+        (NoReturn, n(NoReturn)),
+        (Text, n(Text)),
         # Type variables
+        # ...
     ),
 )
 def test_normalise(type_: Any, expected: NormalisedType) -> None:
     assert normalise(type_) == expected
+
+
+@pytest.mark.parametrize(
+    "type_",
+    (
+        # TODO: 'Generic', with or without args should throw an exception
+        Generic,
+        Generic[T],
+        Literal,
+        Optional,
+        # TODO: 'Protocol', with or without args should throw an exception
+        Protocol,
+        Protocol[T],
+        # TODO: 'Union' with no args should throw exception
+        Union,
+    )
+)
+def test_normalise_raises_exception(type_: Any) -> None:
+    with pytest.raises(ValueError):
+        normalise(type_)

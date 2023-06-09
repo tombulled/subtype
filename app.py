@@ -1,5 +1,6 @@
 import typing
-from typing import Dict, Literal, Optional, Sequence, Type, TypeVar, Union, NamedTuple
+from typing import Dict, Generic, Literal, Optional, Protocol, Sequence, Type, TypeVar, Union, NamedTuple
+import typing_extensions
 
 # from subtype import normalise
 # from subtype.normalisation import _type_var_to_type
@@ -36,3 +37,6 @@ class Foo(NamedTuple):
 
 
 x: Type[NamedTuple] = Foo
+
+x: Generic = 123
+x: Protocol[int] = 123

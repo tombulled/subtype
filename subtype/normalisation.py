@@ -4,9 +4,12 @@ from typing import (
     Any,
     ClassVar,
     Final,
+    Generic,
     Literal,
     Mapping,
+    NoReturn,
     Optional,
+    Protocol,
     Tuple,
     TypeVar,
     Union,
@@ -45,7 +48,12 @@ def normalise(type_: Any, /) -> NormalisedType:
     origin: Optional[Any] = typing.get_origin(type_)
     args: Tuple[Any, ...] = typing.get_args(type_)
 
-    if type_ in (None, Ellipsis) or isinstance(type_, type):
+    if type_ is Generic:
+        raise ValueError("Variable \"typing.Generic\" is not valid as a type")
+    elif type_ is Protocol:
+        raise ValueError("Variable \"typing.Protocol\" is not valid as a type")
+
+    if type_ in (None, Ellipsis, NoReturn) or isinstance(type_, type):
         return NormalisedType(type_)
 
     # Temporarily assume that if it's a primitive, then in it's an arg of Literal[...]
@@ -67,6 +75,11 @@ def normalise(type_: Any, /) -> NormalisedType:
         raise NotImplementedError
 
     if isinstance(type_, GenericAlias) and origin is not None:
+        if origin is Generic:
+            raise ValueError("Variable \"typing.Generic\" is not valid as a type")
+        elif origin is Protocol:
+            raise ValueError("Variable \"typing.Protocol\" is not valid as a type")
+
         if not args:
             if origin is tuple:
                 args = (Any, ...)
