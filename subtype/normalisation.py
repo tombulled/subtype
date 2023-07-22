@@ -4,6 +4,7 @@ from typing import (
     Any,
     ClassVar,
     Final,
+    ForwardRef,
     Generic,
     Literal,
     Mapping,
@@ -53,12 +54,23 @@ def normalise(type_: Any, /) -> NormalisedType:
     elif type_ is Protocol:
         raise ValueError("Variable \"typing.Protocol\" is not valid as a type")
 
-    if type_ in (None, Ellipsis, NoReturn) or isinstance(type_, type):
+    if type_ in (None, Ellipsis, NoReturn):
+        return NormalisedType(type_)
+    
+    if isinstance(type_, type):
+        if issubclass(type_, typing.Generic):
+            args = tuple(Any for _ in type_.__parameters__)
+            
+            return NormalisedType(type_, tuple(normalise(arg) for arg in args))
+        
         return NormalisedType(type_)
 
     # Temporarily assume that if it's a primitive, then in it's an arg of Literal[...]
     if isinstance(type_, (str, int)):
         return NormalisedType(type_)
+    
+    if isinstance(type_, ForwardRef):
+        raise ValueError("ForwardRef(...) is an invalid type comment or annotation")
 
     if isinstance(type_, typing._SpecialForm):
         if type_ in (Any,):
@@ -72,6 +84,7 @@ def normalise(type_: Any, /) -> NormalisedType:
         elif type_ is Literal:
             raise ValueError("Literal[...] must have at least one parameter")
 
+        # TODO TODO TODO
         raise NotImplementedError
 
     if isinstance(type_, GenericAlias) and origin is not None:
