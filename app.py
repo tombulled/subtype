@@ -1,5 +1,16 @@
 import typing
-from typing import Dict, Generic, Literal, Optional, Protocol, Sequence, Type, TypeVar, Union, NamedTuple
+from typing import (
+    Dict,
+    Generic,
+    Literal,
+    Optional,
+    Protocol,
+    Sequence,
+    Type,
+    TypeVar,
+    Union,
+    NamedTuple,
+)
 import typing_extensions
 
 # from subtype import normalise
