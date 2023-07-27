@@ -2,12 +2,11 @@ import collections.abc
 import contextlib
 import decimal
 import typing as t
-import typing_extensions as te
 
 import pytest
 from typing_extensions import ParamSpec
 
-from subtype import NormalisedType, normalise
+from subtype.normalisation import NormalisedType, normalise
 
 T = t.TypeVar("T")
 PS = ParamSpec("PS")
@@ -91,7 +90,10 @@ def n(*args) -> NormalisedType:
         (t.MappingView, n(collections.abc.MappingView, (n(t.Any),))),
         (t.MappingView[str], n(collections.abc.MappingView, (n(str),))),
         (t.MutableMapping, n(collections.abc.MutableMapping, (n(t.Any), n(t.Any)))),
-        (t.MutableMapping[str, int], n(collections.abc.MutableMapping, (n(str), n(int)))),
+        (
+            t.MutableMapping[str, int],
+            n(collections.abc.MutableMapping, (n(str), n(int))),
+        ),
         (t.MutableSequence, n(collections.abc.MutableSequence, (n(t.Any),))),
         (t.MutableSequence[str], n(collections.abc.MutableSequence, (n(str),))),
         (t.MutableSet, n(collections.abc.MutableSet, (n(t.Any),))),
@@ -115,7 +117,10 @@ def n(*args) -> NormalisedType:
         (t.Collection, n(collections.abc.Collection, (n(t.Any),))),
         (t.Collection[str], n(collections.abc.Collection, (n(str),))),
         (t.AsyncGenerator, n(collections.abc.AsyncGenerator, (n(t.Any), n(t.Any)))),
-        (t.AsyncGenerator[int, str], n(collections.abc.AsyncGenerator, (n(int), n(str)))),
+        (
+            t.AsyncGenerator[int, str],
+            n(collections.abc.AsyncGenerator, (n(int), n(str))),
+        ),
         (t.AsyncContextManager, n(contextlib.AbstractAsyncContextManager, (n(t.Any),))),
         (
             t.AsyncContextManager[int],
@@ -182,7 +187,7 @@ def test_normalise(type_: t.Any, expected: NormalisedType) -> None:
         t.Protocol[T],
         t.Union,
         t.ForwardRef("SomeClass"),
-    )
+    ),
 )
 def test_normalise_raises_exception(type_: t.Any) -> None:
     with pytest.raises(ValueError):

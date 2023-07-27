@@ -1,53 +1,52 @@
-import typing
-from typing import Any, Protocol
+from typing import Any
 
-
-def _is_protocol(type_: type, /) -> bool:
-    return isinstance(type_, type) and issubclass(type_, type(Protocol))
-
-
-def _is_runtime_protocol(type_: type, /) -> bool:
-    return _is_protocol(type_) and getattr(type_, "_is_runtime_protocol", False) is True
-
-
-def _is_generic_alias(obj: Any, /) -> bool:
-    return isinstance(obj, typing._GenericAlias)  # type: ignore
+from .utils import (
+    is_any,
+    is_protocol,
+    is_runtime_protocol,
+    is_type_var,
+    type_var_to_type,
+)
 
 
 def is_subtype(lhs: Any, rhs: Any, /) -> bool:
-    """
-    Check whether `lhs` is a subtype of `rhs`
-
-    For example, `int` is a valid subtype of `Any`
-    """
+    """Check whether `lhs` is a subtype of `rhs`"""
 
     #
-    # Identity check - is `lhs` the same as `rhs`?
+    # [Case 1: Any check] Everything is a subtype of `Any`
+    #
+    if is_any(rhs):
+        return True
+
+    #
+    # [Case 2: Identity check] Everything is a subtype of itself
     #
     if lhs is rhs:
         return True
 
     #
-    # Subclass check - is `lhs` a subclass of `rhs`?
+    # [Case 3: Subclass check] A subclass is a subtype of its superclass
     #
     if issubclass(lhs, rhs):
         return True
 
     #
-    # Interface check - does `lhs` implement `rhs`?
+    # [Case 4: Protocol check] A protocol implementation is a subtype of the protocol
     #
-    if (
-        isinstance(lhs, type)
-        and isinstance(rhs, type)
-        and _is_protocol(rhs)
-        and _is_runtime_protocol(rhs)
-        and isinstance(lhs, rhs)
-    ):
+    if is_protocol(rhs) and is_runtime_protocol(rhs) and isinstance(lhs, rhs):
         return True
 
     #
-    # Generic alias check
+    # [Case 5: LHS Union check]
     #
     # TODO
+    # 1. is_union(lhs) and all(is_subtype(arg) for arg in get_args(lhs))
+    #       E.g. is_subtype(Union[int, float], Number)
+    # 2. ...
+
+    #
+    # [Case 6: RHS TypeVar check]
+    if is_type_var(rhs):
+        return is_subtype(lhs, type_var_to_type(rhs))
 
     return False

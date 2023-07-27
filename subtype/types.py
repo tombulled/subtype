@@ -1,7 +1,10 @@
 import typing
 from typing import Sequence, Union
 
-__all__: Sequence[str] = ("GenericAlias", "Type",)
+__all__: Sequence[str] = (
+    "GenericAlias",
+    "Type",
+)
 
 
 GenericAlias = typing._GenericAlias  # type: ignore
