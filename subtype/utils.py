@@ -10,11 +10,19 @@ def is_any(t: Any, /) -> bool:
     return t in (typing.Any, typing_extensions.Any)
 
 
+def is_final(t: Any, /) -> bool:
+    return typing.get_origin(t) in (typing.Literal, typing_extensions.Literal)
+
+
+def is_literal(t: Any, /) -> bool:
+    return typing.get_origin(t) in (typing.Literal, typing_extensions.Literal)
+
+
 def is_protocol(t: Any, /) -> bool:
     if not isinstance(t, type):
         return False
 
-    if not issubclass(t, Protocol):  # type: ignore
+    if not issubclass(t, (typing.Protocol, typing_extensions.Protocol)):  # type: ignore
         return False
 
     return t._is_protocol is True  # type: ignore
@@ -43,3 +51,7 @@ def type_var_to_type(type_var: TypeVar, /) -> Any:
         return Union.__getitem__(constraints)  # type: ignore
 
     return Any
+
+
+def is_subclass(lhs: Any, rhs: Any) -> bool:
+    return isinstance(lhs, type) and isinstance(rhs, type) and issubclass(lhs, rhs)

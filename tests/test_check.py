@@ -39,6 +39,14 @@ def test_any(typ: Any) -> None:
     assert is_subtype(typ, typ)
 
 
+def test_none() -> None:
+    """
+    Only `None` is a subtype of `None`
+    """
+    assert is_subtype(None, None)
+    assert not is_subtype(int, None)
+
+
 @pytest.mark.parametrize(
     "typ",
     (
